@@ -10,6 +10,10 @@ const userSchema = Schema({
     password: {
         type: String,
         required: true
+    },
+    authkey: {
+        type: String,
+        required: false
     }
 })
 
