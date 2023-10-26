@@ -5,8 +5,8 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const cors = require("cors")
+const PORT = process.env.PORT || 4000;
 // const PORT = 4000;
-const PORT = process.env.PORT;
 const app = express();
 const bodyParser = require("body-parser");
 app.use(cors())
@@ -17,7 +17,7 @@ connectDB();
 app.get("/logout", (req, res) => {
   try {
     res.clearCookie("authcookie");
-    res.send("User logout succesfully");
+    res.status(200).json({message:"User logout succesfully" ,msgId:0});
     return;
   } catch (err) {
     console.log(err);
@@ -41,7 +41,7 @@ app.post("/createUser", async (req, res) => {
   try {
     const find = await Users.findOne({ name });
     if (find) {
-      return res.status(404).send("User Already Present");
+      return res.status(200).json({message:"User Already Present", msgId : -1 });
     }
     users = new Users({
       name,
@@ -56,9 +56,9 @@ app.post("/createUser", async (req, res) => {
   }
 
   if (users) {
-    return res.status(201).send("User created successfully");
+    return res.status(201).json({message:"User created successfully",msgId:0});
   } else {
-    return res.status(404).send("User not created");
+    return res.status(404).json({message:"User not created",msgId:-1});
   }
 });
 
@@ -82,11 +82,12 @@ app.post("/loginUser", async (req, res) => {
 
     if (findUser && (await bcrypt.compare(password, findUser.password))) {
      return  res.status(200).json({
-        msg: "User login Successfully",
+        message: "User login Successfully",
+        msgId: 0,
         token: token,
       });
     } else {
-      res.status(404).send("User login failed");
+      res.status(200).json({message:"User login failed", msgId:-1});
       return 
     }
   } catch (err) {
@@ -106,9 +107,9 @@ app.get("/alluser", async (req, res) => {
   }
 
   if (users) {
-    res.status(200).send(users);
+    res.status(200).json({message:"User are as follow",user:users, msgId:0});
   } else {
-    res.status(404).send("User not fetched");
+    res.status(200).json({message:"User not fetched",msgId:0});
   }
 });
 app.get("/protect", async (req, res) => {
@@ -135,43 +136,47 @@ app.get("/protect", async (req, res) => {
   }
 });
 app.get("/", (req, res) => {
-  res.end("Welcome to User Authentication App");
+  res.json({message:"Welcome to User Authentication App", msgId:0});
 });
-app.post("/deleteUser", async (req,res)=>{
-  const { name, password } = req.body;
+// app.post("/deleteUser", async (req,res)=>{
+//   const { name, password } = req.body;
 
  
-  try {
-    const findUser = await Users.findOne({ name });
+//   try {
+//     const findUser = await Users.findOne({ name });
 
  
 
   
 
-    if (findUser && (await bcrypt.compare(password, findUser.password))) {
-      // console.log("inside");
-      //   const deleteUser = await Users.deleteOne(name)
+//     if (findUser && (await bcrypt.compare(password, findUser.password))) {
+//       // console.log("inside");
+//       //   const deleteUser = await Users.deleteOne(name)
 
-      //   console.log(deleteUser," deleteuser");
+//       //   console.log(deleteUser," deleteuser");
 
-      //   if(deleteUser) {
-      //     return res.status(200).send("User deleted sucessfully")
-      //   }else {
-      //     return res.status(404).send("User cannot deleted")
-      //   }
+//       //   if(deleteUser) {
+//       //     return res.status(200).send("User deleted sucessfully")
+//       //   }else {
+//       //     return res.status(404).send("User cannot deleted")
+//       //   }
 
-      res.status(200).send("inside function ")
-      return 
-    } else {
-      res.status(404).send("User not found");
-      return 
-    }
-  } catch (err) {
-    console.log(err);
-   res.status(500).send("Internal Server Error");
-   return 
-  }
-})
+//       res.status(200).send("inside function ")
+
+//       const deleteUser = await Users.delete({name})
+
+//       res.send(deleteUser)
+//       return 
+//     } else {
+//       res.status(404).send("User not found");
+//       return 
+//     }
+//   } catch (err) {
+//     console.log(err);
+//    res.status(500).send("Internal Server Error");
+//    return 
+//   }
+// })
 app.listen(PORT, () => {
-  console.log("Server is running");
+  console.log(`Server is running on PORT : ${PORT}`);
 });
