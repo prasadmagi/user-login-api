@@ -36,7 +36,7 @@ app.post("/createUser", async (req, res) => {
 
   const { name, password, role } = req.body;
 
-  if (!(name && password && role)) {
+  if (!(name && password)) {
     res.status(404).send("Please provide all value");
     return;
   }
