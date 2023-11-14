@@ -32,19 +32,24 @@ app.get("/logout", (req, res) => {
   }
 });
 app.post("/createUser", async (req, res) => {
-  // const name = req.body.name
 
-  const { name, password } = req.body;
 
-  if (!(name && password)) {
+  const { name, password, role } = req.body;
+
+  if (!(name && password && role)) {
     res.status(404).send("Please provide all value");
     return;
   }
 
+
+  if (typeof (role) !== "boolean") {
+
+    return res.status(400).send("Please provide proper value for role !")
+  }
   let users;
   let securedpassword = await bcrypt.hash(password, 10);
 
-  // console.log(securedpassword, "checkpassword");
+
 
   try {
     const find = await Users.findOne({ name });
@@ -54,6 +59,7 @@ app.post("/createUser", async (req, res) => {
     users = new Users({
       name,
       password: securedpassword,
+      role: role
     });
 
     await users.save();
@@ -64,7 +70,13 @@ app.post("/createUser", async (req, res) => {
   }
 
   if (users) {
-    return res.status(201).json({ message: "User created successfully", msgId: 0 });
+    if (role) {
+
+      return res.status(201).json({ message: "Admin User created successfully", msgId: 0 });
+    } else {
+
+      return res.status(201).json({ message: "User created successfully", msgId: 0 });
+    }
   } else {
     return res.status(404).json({ message: "User not created", msgId: -1 });
   }
@@ -122,8 +134,9 @@ app.get("/alluser", async (req, res) => {
     res.status(200).json({ message: "User not fetched", msgId: 0 });
   }
 });
+
 app.get("/protect", async (req, res) => {
-  // const token  = req.headers.auth
+
   const token = req.cookies.authcookie;
   const key = process.env.Secreat_Key;
   try {
@@ -145,48 +158,11 @@ app.get("/protect", async (req, res) => {
     res.status(404).send("Invalid token");
   }
 });
+
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to User Authentication App", msgId: 0 });
 });
-// app.post("/deleteUser", async (req,res)=>{
-//   const { name, password } = req.body;
 
-
-//   try {
-//     const findUser = await Users.findOne({ name });
-
-
-
-
-
-//     if (findUser && (await bcrypt.compare(password, findUser.password))) {
-//       // console.log("inside");
-//       //   const deleteUser = await Users.deleteOne(name)
-
-//       //   console.log(deleteUser," deleteuser");
-
-//       //   if(deleteUser) {
-//       //     return res.status(200).send("User deleted sucessfully")
-//       //   }else {
-//       //     return res.status(404).send("User cannot deleted")
-//       //   }
-
-//       res.status(200).send("inside function ")
-
-//       const deleteUser = await Users.delete({name})
-
-//       res.send(deleteUser)
-//       return 
-//     } else {
-//       res.status(404).send("User not found");
-//       return 
-//     }
-//   } catch (err) {
-//     console.log(err);
-//    res.status(500).send("Internal Server Error");
-//    return 
-//   }
-// })
 app.listen(PORT, () => {
   console.log(`Server is running on PORT : ${PORT}`);
 });

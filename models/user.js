@@ -11,9 +11,10 @@ const userSchema = Schema({
         type: String,
         required: true
     },
-    authkey: {
-        type: String,
-        required: false
+    role: {
+        type: Boolean,
+        required: true,
+        default: false,
     }
 })
 
