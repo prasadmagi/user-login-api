@@ -119,6 +119,21 @@ app.post("/loginUser", async (req, res) => {
   }
 });
 
+app.post("/deleteUser", async (req, res) => {
+  const { name, password } = req.body
+  try {
+    const findUser = await Users.findOne({ name });
+    if (findUser && (await bcrypt.compare(password, findUser.password))) {
+      await findUser.remove()
+      return res.status(200).json({ message: "User deleted successfully", msgId: 0 })
+    } else {
+      return res.status(200).json({ message: "User Not Found", msgId: -1 })
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error", msgId: -1 })
+  }
+})
 app.get("/alluser", async (req, res) => {
   let users;
 
@@ -158,7 +173,43 @@ app.get("/protect", async (req, res) => {
     res.status(404).send("Invalid token");
   }
 });
+app.post("/changePassword", async (req, res) => {
 
+  const { name, oldpassword, newpassword } = req.body
+  const finduser = await Users.findOne({ name })
+
+  try {
+    if (!(name && oldpassword && newpassword)) {
+      return res.status(200).json({ message: "Please provide all values..!" })
+    }
+    if (!finduser) {
+      return res.status(200).json({ message: "User Not Found", msgId: -1 })
+    }
+
+    if (await (bcrypt.compare(oldpassword, finduser.password))) {
+
+      if (await (bcrypt.compare(newpassword, finduser.password))) {
+        return res.status(200).json({ message: "Newpassword cannot same as Oldpassword", msgId: -1 })
+      }
+      // return res.status(200).json({ message: finduser._id })
+      let securednewpassword = await bcrypt.hash(newpassword, 10)
+      let newUser = await Users.findByIdAndUpdate(finduser._id, { password: securednewpassword })
+
+      await newUser.save()
+
+      if (newUser) {
+        return res.status(200).json({ message: "Password changes successfully", msgId: 0 })
+      } else {
+        return res.status(200).json({ message: "Password not change", msgId: -1 })
+      }
+    } else {
+      return res.status(200).json({ message: "Oldpassword not matched", msgId: -1 })
+    }
+
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error", msgId: -1 })
+  }
+})
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to User Authentication App", msgId: 0 });
 });
