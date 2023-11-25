@@ -210,6 +210,72 @@ app.post("/changePassword", async (req, res) => {
     res.status(500).json({ message: "Internal server error", msgId: -1 })
   }
 })
+app.post("/changeUserName", async (req, res) => {
+  const { oldname, newname, password } = req.body
+  const finduser = await Users.find({ oldname })
+
+  try {
+    if (!(oldname && newname && password)) {
+      return res.status(200).json({ message: "Please provide all values..!" })
+    }
+    if (!finduser) {
+      return res.status(200).json({ message: "User Not Found", msgId: -1 })
+    }
+
+    if (await (bcrypt.compare(password, finduser.password))) {
+
+      if (oldname === await (finduser.name)) {
+        return res.status(200).json({ message: "newusername cannot same as oldusername", msgId: -1 })
+      }
+
+
+      let newUser = await Users.findByIdAndUpdate(finduser._id, { name: newname })
+
+      await newUser.save()
+
+      if (newUser) {
+        return res.status(200).json({ message: "Username changes successfully", msgId: 0 })
+      } else {
+        return res.status(200).json({ message: "Username not change", msgId: -1 })
+      }
+    } else {
+      return res.status(200).json({ message: "Oldpassword not matched", msgId: -1 })
+    }
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Internal server error", msgId: -1 })
+  }
+})
+app.post("/deleteUser", async (req, res) => {
+  const { name, password } = req.body
+  const findUser = await Users.findOne({ name })
+  try {
+    if (!(name && password)) {
+      return res.status(200).json({ message: "Please provide all values..!", msgId: -1 })
+    }
+    if (!findUser) {
+      return res.status(200).json({ message: "User Not Found", msgId: -1 })
+    }
+
+    if (findUser && (await bcrypt(password, findUser.password))) {
+      // const deleteUser = await Users.findOneAndRemove(findUser._id)
+
+      let deleteUser = await Users.deleteMany({ name: name })
+
+      if (deleteUser) {
+        return res.status(200).json({ message: "User Deleted Successfully", msgId: -1 })
+      } else {
+        return res.status(200).json({ message: "User Not Deleted", msgId: -1 })
+      }
+    } else {
+      return res.status(200).json({ message: "Password Not Matched", msgId: -1 })
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error", msgId: -1 })
+  }
+})
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to User Authentication App", msgId: 0 });
 });
