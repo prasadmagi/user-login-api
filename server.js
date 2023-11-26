@@ -88,7 +88,9 @@ app.post("/loginUser", async (req, res) => {
   let cookie = req.cookies.authcookie
   try {
     const findUser = await Users.findOne({ name });
-
+    if (!findUser) {
+      return res.json({ message: "User Not Found", msgId: -1 })
+    }
     const paylod = {
       name: findUser.name,
       password: findUser.password,
@@ -212,7 +214,7 @@ app.post("/changePassword", async (req, res) => {
 })
 app.post("/changeUserName", async (req, res) => {
   const { oldname, newname, password } = req.body
-  const finduser = await Users.find({ oldname })
+  const finduser = await Users.findOne({ name: oldname })
 
   try {
     if (!(oldname && newname && password)) {
@@ -222,9 +224,9 @@ app.post("/changeUserName", async (req, res) => {
       return res.status(200).json({ message: "User Not Found", msgId: -1 })
     }
 
-    if (await (bcrypt.compare(password, finduser.password))) {
+    if (finduser && await (bcrypt.compare(password, finduser.password))) {
 
-      if (oldname === await (finduser.name)) {
+      if (newname === await (finduser.name)) {
         return res.status(200).json({ message: "newusername cannot same as oldusername", msgId: -1 })
       }
 
@@ -261,7 +263,13 @@ app.post("/deleteUser", async (req, res) => {
     if (findUser && (await bcrypt(password, findUser.password))) {
       // const deleteUser = await Users.findOneAndRemove(findUser._id)
 
-      let deleteUser = await Users.deleteMany({ name: name })
+      // let deleteUser = await Users.findOneAndRemove({ _id: findUser._id })
+
+      Users.deleteOne({ _id: findUser._id }).then(function () {
+        return res.status(200).json({ message: "delted" })
+      }).catch((err) => {
+        res.status(200).json({ message: "NOt deleted" })
+      })
 
       if (deleteUser) {
         return res.status(200).json({ message: "User Deleted Successfully", msgId: -1 })
