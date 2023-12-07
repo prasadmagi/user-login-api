@@ -19,4 +19,4 @@ const userSchema = Schema({
 })
 
 
-module.exports = mongoose.model('API', userSchema)
+module.exports = mongoose.model('apis', userSchema)
