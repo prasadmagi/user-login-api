@@ -276,43 +276,81 @@ const allUser = async (req, res) => {
   }
 }
 
+// const userData = async (req, res) => {
+//   const { name, data } = req.body
+//   const findUser = await Users.findOne({ name })
+//   try {
+//     if (!(name && data)) {
+//       return res.status(200).json({ message: "Please Provide All Values", msgId: -1 })
+//     }
+//     if (!findUser) {
+//       return res.status(200).json({ message: "User Not Found", msgId: -1 })
+//     } else {
+//       let id = await findUser._id
+//       let finduserdata = await UsersData.find({ id })
+//       if (finduserdata) {
+//         let UserdataUpdated = await UsersData.updateOne({ user_id: id }, { data: data })
+//         if (!UserdataUpdated) {
+//           return res.status(200).json({ message: "User data not updated", msgId: -1 })
+//         } else {
+//           await UserdataUpdated.save();
+//           // console.log(msg);
+//           return res.status(200).json({ message: "User data updated", msgId: 0 })
+
+//         }
+
+//       } else {
+//         let UserDataNew = new UsersData({
+//           user_id: user_id,
+//           data: data
+//         })
+
+//         await UserDataNew.save()
+
+//         return res.status(200).json({ message: "User data created", msgId: 0 })
+//       }
+//     }
+
+//   } catch (err) {
+//     console.log(err);
+//     return res.status(500).json({ message: "Internal Server Error", msgId: -1 })
+//   }
+// }
+
+
 const userData = async (req, res) => {
   const { name, data } = req.body
-  const findUser = await Users.find({ name })
+  const finduser = await Users.findOne({ name })
   try {
-    if (!(name && data)) {
-      return res.status(200).json({ message: "Please Provide All Values", msgId: -1 })
-    }
-    if (!findUser) {
+    if (!finduser) {
       return res.status(200).json({ message: "User Not Found", msgId: -1 })
     } else {
-      let finduserdata = await UsersData.findOne({ name })
+      let user_id = await finduser._id
+      let userdata = await UsersData.find({ user_id })
 
-      if (finduserdata) {
-        let UserdataUpdated = UsersData.findOneAndUpdate({ name: name }, { data: data })
-        if (!UserdataUpdated) {
-          return res.status(200).json({ message: "User data not updated", msgId: -1 })
+      if (userdata) {
+        let updateduserdata = await UsersData.updateOne({ user_id: user_id }, { data: data })
+        if (updateduserdata) {
+          await updateduserdata.save()
+          return res.status(200).json("data updated")
         } else {
-          // console.log(msg);
-          return res.status(200).json({ message: "User data updated", msgId: 0 })
-
+          return res.status(200).json("user data not updated")
         }
 
       } else {
-        let UserDataNew = new UsersData({
-          name: name,
+        let newUserData = new UsersData({
+          user_id: user_id,
           data: data
         })
-
-        await UserDataNew.save()
-
-        return res.status(200).json({ message: "User data created", msgId: 0 })
+        await newUserData.save()
+        return res.status(200).json("user data updated")
       }
-    }
 
+
+    }
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ message: "Internal Server Error", msgId: -1 })
+    return res.status(500).json({ message: "INternal Server error", msgId: -1 })
   }
 }
 exports.main = main
