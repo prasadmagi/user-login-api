@@ -4,8 +4,8 @@ const Schema = mongoose.Schema;
 
 const userSchema = Schema({
     user_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "apis"
+        type: String,
+        required: true
     },
     data: {
         type: String,

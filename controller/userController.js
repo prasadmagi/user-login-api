@@ -1,11 +1,11 @@
 const Users = require("../models/user");
-const UsersData = require("../models/userdata")
+const UsersData = require("../models/userdata");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const main = async (req, res) => {
   res.json({ message: "Welcome to User Authentication App", msgId: 0 });
-}
+};
 
 const createUser = async (req, res) => {
   const { name, password, role } = req.body;
@@ -54,7 +54,7 @@ const createUser = async (req, res) => {
   } else {
     return res.status(404).json({ message: "User not created", msgId: -1 });
   }
-}
+};
 
 const loginUser = async (req, res) => {
   const { name, password } = req.body;
@@ -92,7 +92,7 @@ const loginUser = async (req, res) => {
     res.status(500).send("Internal Server Error");
     return;
   }
-}
+};
 
 const deleteUser = async (req, res) => {
   const { name, password } = req.body;
@@ -124,7 +124,7 @@ const deleteUser = async (req, res) => {
       .status(500)
       .json({ message: "Internal Server Error", msgId: -1 });
   }
-}
+};
 
 const changePassword = async (req, res) => {
   const { name, oldpassword, newpassword } = req.body;
@@ -170,7 +170,7 @@ const changePassword = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: "Internal server error", msgId: -1 });
   }
-}
+};
 
 const changeUserName = async (req, res) => {
   const { oldname, newname, password } = req.body;
@@ -216,7 +216,7 @@ const changeUserName = async (req, res) => {
     console.log(err);
     res.status(500).json({ message: "Internal server error", msgId: -1 });
   }
-}
+};
 
 const logout = async (req, res) => {
   try {
@@ -233,7 +233,7 @@ const logout = async (req, res) => {
   } catch (err) {
     console.log(err);
   }
-}
+};
 
 const protect = async (req, res) => {
   const token = req.cookies.authcookie;
@@ -256,7 +256,7 @@ const protect = async (req, res) => {
     console.log(err);
     res.status(404).send("Invalid token");
   }
-}
+};
 
 const allUser = async (req, res) => {
   let users;
@@ -274,7 +274,7 @@ const allUser = async (req, res) => {
   } else {
     res.status(200).json({ message: "User not fetched", msgId: 0 });
   }
-}
+};
 
 // const userData = async (req, res) => {
 //   const { name, data } = req.body
@@ -317,49 +317,67 @@ const allUser = async (req, res) => {
 //   }
 // }
 
-
 const userData = async (req, res) => {
-  const { name, data } = req.body
-  const finduser = await Users.findOne({ name })
+  const { name, data } = req.body;
+  const finduser = await Users.findOne({ name: name });
+  console.log(finduser, "finduser");
+  const id = await finduser.user_id;
+  console.log(id, "id");
+  const finduserid = await UsersData.findOne({ id });
+  console.log(finduserid, "finduserid");
+  const _finduserid = await finduserid._id;
+  console.log(_finduserid, "\ id");
   try {
     if (!finduser) {
-      return res.status(200).json({ message: "User Not Found", msgId: -1 })
+      return res.status(200).json({ message: "User Not Found", msgId: -1 });
     } else {
-      let user_id = await finduser._id
-      let userdata = await UsersData.find({ user_id })
-
+      let user_id = await finduser._id;
+      console.log(typeof user_id, user_id);
+      let userdata = await UsersData.findOne({ user_id: user_id });
+      console.log(userdata, "User data");
       if (userdata) {
-        let updateduserdata = await UsersData.updateOne({ user_id: user_id }, { data: data })
-        if (updateduserdata) {
-          await updateduserdata.save()
-          return res.status(200).json("data updated")
-        } else {
-          return res.status(200).json("user data not updated")
+        try {
+          let updateduserdata = await UsersData.findByIdAndUpdate(
+            _finduserid,
+            {
+              _id:_finduserid,
+              data: data,
+            },
+            { new: true }
+          );
+          let result = updateduserdata;
+          console.log(result, "check");
+          if (updateduserdata) {
+            return res.status(200).json("data updated");
+          } else {
+            return res.status(200).json("user data not updated");
+          }
+        } catch (error) {
+          console.log(error, "error");
         }
-
       } else {
         let newUserData = new UsersData({
           user_id: user_id,
-          data: data
-        })
-        await newUserData.save()
-        return res.status(200).json("user data updated")
+          data: data,
+        });
+        await newUserData.save();
+        return res.status(200).json("user data updated");
       }
-
-
     }
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ message: "INternal Server error", msgId: -1 })
+    return res
+      .status(500)
+      .json({ message: "INternal Server error", msgId: -1 });
   }
-}
-exports.main = main
-exports.createUser = createUser
-exports.loginUser = loginUser
-exports.deleteUser = deleteUser
-exports.changePassword = changePassword
-exports.changeUserName = changeUserName
-exports.logout = logout
-exports.protect = protect
-exports.allUser = allUser
-exports.userData = userData
+};
+exports.main = main;
+exports.createUser = createUser;
+exports.loginUser = loginUser;
+exports.deleteUser = deleteUser;
+exports.changePassword = changePassword;
+exports.changeUserName = changeUserName;
+exports.logout = logout;
+exports.protect = protect;
+exports.allUser = allUser;
+exports.userData = userData;
