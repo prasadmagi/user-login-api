@@ -12,6 +12,7 @@ router.post("/changeUserName", UserController.changeUserName)
 router.get("/logout", UserController.logout)
 router.post("/protect", UserController.protect)
 router.post("/allUser", UserController.allUser)
-router.put("/userData", UserController.userData)
+router.put("/sendUserData", UserController.sendUserData)
+router.get("/getUserData", UserController.getUserData)
 
 module.exports = router

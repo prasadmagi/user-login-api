@@ -276,84 +276,40 @@ const allUser = async (req, res) => {
   }
 };
 
-// const userData = async (req, res) => {
-//   const { name, data } = req.body
-//   const findUser = await Users.findOne({ name })
-//   try {
-//     if (!(name && data)) {
-//       return res.status(200).json({ message: "Please Provide All Values", msgId: -1 })
-//     }
-//     if (!findUser) {
-//       return res.status(200).json({ message: "User Not Found", msgId: -1 })
-//     } else {
-//       let id = await findUser._id
-//       let finduserdata = await UsersData.find({ id })
-//       if (finduserdata) {
-//         let UserdataUpdated = await UsersData.updateOne({ user_id: id }, { data: data })
-//         if (!UserdataUpdated) {
-//           return res.status(200).json({ message: "User data not updated", msgId: -1 })
-//         } else {
-//           await UserdataUpdated.save();
-//           // console.log(msg);
-//           return res.status(200).json({ message: "User data updated", msgId: 0 })
 
-//         }
+const sendUserData = async (req, res) => {
 
-//       } else {
-//         let UserDataNew = new UsersData({
-//           user_id: user_id,
-//           data: data
-//         })
-
-//         await UserDataNew.save()
-
-//         return res.status(200).json({ message: "User data created", msgId: 0 })
-//       }
-//     }
-
-//   } catch (err) {
-//     console.log(err);
-//     return res.status(500).json({ message: "Internal Server Error", msgId: -1 })
-//   }
-// }
-
-const userData = async (req, res) => {
   const { name, data } = req.body;
   const finduser = await Users.findOne({ name: name });
-  console.log(finduser, "finduser");
   const id = await finduser.user_id;
-  console.log(id, "id");
   const finduserid = await UsersData.findOne({ id });
-  console.log(finduserid, "finduserid");
-  const _finduserid = await finduserid._id;
-  console.log(_finduserid, "\ id");
   try {
     if (!finduser) {
       return res.status(200).json({ message: "User Not Found", msgId: -1 });
     } else {
       let user_id = await finduser._id;
-      console.log(typeof user_id, user_id);
       let userdata = await UsersData.findOne({ user_id: user_id });
-      console.log(userdata, "User data");
+
       if (userdata) {
+        const _finduserid = await finduserid._id;
         try {
           let updateduserdata = await UsersData.findByIdAndUpdate(
             _finduserid,
             {
-              _id:_finduserid,
+              _id: _finduserid,
               data: data,
             },
             { new: true }
           );
-          let result = updateduserdata;
-          console.log(result, "check");
+
           if (updateduserdata) {
-            return res.status(200).json("data updated");
+            return res.status(200).json({ message: "User Data Updated Succsessfully", msgId: 0 });
           } else {
-            return res.status(200).json("user data not updated");
+            return res.status(200).json({ message: "User Data Not Updated", msgId: -1 });
           }
         } catch (error) {
           console.log(error, "error");
+          return res.status(500).json({ message: "Internal Server Error", msgId: -1 })
         }
       } else {
         let newUserData = new UsersData({
@@ -361,7 +317,7 @@ const userData = async (req, res) => {
           data: data,
         });
         await newUserData.save();
-        return res.status(200).json("user data updated");
+        return res.status(200).json({ message: "User Data Created Successfully", msgId: -0 });
       }
     }
   } catch (err) {
@@ -371,6 +327,30 @@ const userData = async (req, res) => {
       .json({ message: "INternal Server error", msgId: -1 });
   }
 };
+
+const getUserData = async (req, res) => {
+  const { name } = req.body
+  const findUser = await Users.findOne({ name })
+  try {
+    if (!(name)) {
+      return res.status(200).json({ message: "Please Provide All Values", msgId: -1 })
+    }
+
+    if (findUser) {
+      const finduserdata = await UsersData.find({ user_id: findUser._id }).select("data")
+      if (finduserdata) {
+        return res.status(200).json({ message: "User Data Fetched Successfully", msgId: 0, data: finduserdata })
+      } else {
+        return res.status(200).json({ message: "User Data Not Found", msgId: -1 })
+      }
+    } else {
+      return res.status(200).json({ message: "User Not Found", msgId: -1 })
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(200).json({ message: "Internal Server Error", msgId: -1 })
+  }
+}
 exports.main = main;
 exports.createUser = createUser;
 exports.loginUser = loginUser;
@@ -380,4 +360,5 @@ exports.changeUserName = changeUserName;
 exports.logout = logout;
 exports.protect = protect;
 exports.allUser = allUser;
-exports.userData = userData;
+exports.sendUserData = sendUserData;
+exports.getUserData = getUserData;
