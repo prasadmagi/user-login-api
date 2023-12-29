@@ -282,12 +282,12 @@ const sendUserData = async (req, res) => {
 
   const { name, data } = req.body;
   const finduser = await Users.findOne({ name: name });
-  const id = await finduser.user_id;
-  const finduserid = await UsersData.findOne({ id });
   try {
     if (!finduser) {
       return res.status(200).json({ message: "User Not Found", msgId: -1 });
     } else {
+      const id = await finduser.user_id;
+      const finduserid = await UsersData.findOne({ id });
       let user_id = await finduser._id;
       let userdata = await UsersData.findOne({ user_id: user_id });
 
