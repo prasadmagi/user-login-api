@@ -11,12 +11,12 @@ const userSchema = Schema({
         type: String,
         required: true
     },
-    role: {
-        type: Boolean,
+    isAdmin: {
+        type: String,
         required: true,
-        default: false,
+        default: "No",
     }
 })
 
 
-module.exports = mongoose.model('apis', userSchema)
+module.exports = mongoose.model('userapi', userSchema)

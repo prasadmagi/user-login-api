@@ -8,16 +8,17 @@ const main = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-  const { name, password, role } = req.body;
+  const { name, password, isAdmin } = req.body;
 
-  if (!(name && password)) {
+  if (!(name && password && isAdmin)) {
     res.status(404).send("Please provide all value");
     return;
   }
 
-  if (typeof role !== "boolean") {
-    return res.status(400).send("Please provide proper value for role !");
+  if (isAdmin != "Yes" && isAdmin != "No") {
+    return res.status(404).json({ message: "Please provide proper admin role! ...", msgId: -1 })
   }
+
   let users;
   let securedpassword = await bcrypt.hash(password, 10);
 
@@ -31,7 +32,7 @@ const createUser = async (req, res) => {
     users = new Users({
       name,
       password: securedpassword,
-      role: role,
+      isAdmin: isAdmin,
     });
 
     await users.save();
@@ -42,7 +43,7 @@ const createUser = async (req, res) => {
   }
 
   if (users) {
-    if (role) {
+    if (isAdmin === "Yes") {
       return res
         .status(201)
         .json({ message: "Admin User created successfully", msgId: 0 });
@@ -70,7 +71,7 @@ const loginUser = async (req, res) => {
       password: findUser.password,
     };
 
-    console.log(cookie, "cookie");
+
     if (cookie) {
       return res.status(200).json({ message: "User Already login", msgId: 0 });
     }
