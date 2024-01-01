@@ -333,9 +333,7 @@ const getUserData = async (req, res) => {
   const { name } = req.body
   const findUser = await Users.findOne({ name })
   try {
-    if (!(name)) {
-      return res.status(200).json({ message: "Please Provide All Values", msgId: -1 })
-    }
+    
 
     if (findUser) {
       const finduserdata = await UsersData.find({ user_id: findUser._id }).select("data")
