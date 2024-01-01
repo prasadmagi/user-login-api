@@ -329,25 +329,29 @@ const sendUserData = async (req, res) => {
   }
 };
 
-const getUserData = async (req, res) => {
-  const { name } = req.body
-  const findUser = await Users.findOne({ name })
-  try {
-    
 
-    if (findUser) {
-      const finduserdata = await UsersData.find({ user_id: findUser._id }).select("data")
-      if (finduserdata) {
-        return res.status(200).json({ message: "User Data Fetched Successfully", msgId: 0, data: finduserdata })
-      } else {
-        return res.status(200).json({ message: "User Data Not Found", msgId: -1 })
+
+const getUserData = async (req,res) => {
+  const {name} = req.body
+  const findUser = await Users.findOne({name})
+  try {
+    if(findUser) {
+      let userId = await findUser._id
+      let findUserData = await UsersData.find({user_id:userId}).select("data")
+      
+      console.log(findUserData,"CHECK");
+      if(findUserData) {
+        return res.status(200).json({data: findUserData})
+      }else {
+        return res.status(200).json({message:"User Data Not Found",msgId:-1}) 
       }
-    } else {
-      return res.status(200).json({ message: "User Not Found", msgId: -1 })
+    }else {
+
+      return res.status(200).json({message:"User Not Found", msgId:-1})
     }
-  } catch (err) {
-    console.log(err);
-    return res.status(200).json({ message: "Internal Server Error", msgId: -1 })
+  }catch (err) {
+    console.log(err,"Error");
+    return res.status(500).json({message:"Internal Server Error", msgId : -1})
   }
 }
 exports.main = main;
