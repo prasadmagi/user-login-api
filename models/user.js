@@ -15,6 +15,13 @@ const userSchema = Schema({
         type: String,
         required: true,
         default: "No",
+    },
+    isActive: {
+        type: Boolean,
+        default: false
+    },
+    token: {
+        type: String
     }
 })
 

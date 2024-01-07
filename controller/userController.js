@@ -77,14 +77,19 @@ const loginUser = async (req, res) => {
     }
 
     if (findUser && (await bcrypt.compare(password, findUser.password))) {
-      const token = jwt.sign(paylod, key, { expiresIn: "2d" });
-      res.cookie("authcookie", token, { maxAge: 900000, httpOnly: true });
+      const token = jwt.sign(paylod, key, { expiresIn: "100d" });
+      console.log("token", typeof (token));
+      //logic for isActive
+      await Users.findByIdAndUpdate(findUser._id, { isActive: true, token: token }, { new: true })
+      // await ActiveUser.save()
+      res.cookie("authcookie", token, { maxAge: 90000000, httpOnly: true });
       return res.status(200).json({
         message: "User login Successfully",
         msgId: 0,
-        token: token,
       });
+
     } else {
+
       res.status(200).json({ message: "User login failed", msgId: -1 });
       return;
     }
@@ -220,19 +225,33 @@ const changeUserName = async (req, res) => {
 };
 
 const logout = async (req, res) => {
+  let cookie = req.cookies.authcookie;
   try {
-    let cookie = req.cookies.authcookie;
-    console.log(cookie, "cookie");
-    if (cookie) {
-      res.clearCookie("authcookie");
-      return res
-        .status(200)
-        .json({ message: "User logout succesfully", msgId: 0 });
-    } else {
-      return res.status(200).json({ message: "Please Login first", msgId: 0 });
+
+    if (!cookie) {
+      return res.status(200).json({ message: "Please Login First", msgId: -1 })
     }
+
+    let findUser = await Users.find({ token: cookie })
+    if (findUser) {
+      await Users.findByIdAndUpdate(findUser._id, { isActive: false }, { new: true })
+      await Users.findByIdAndUpdate(findUser._id, { token: undefined }, { new: true })
+      res.clearCookie("authcookie");
+      return res.status(200).json({ message: "User Logout Successfully", msgId: 0 })
+    } else {
+      return res.status(200).json({ message: "User Not Found", msgId: -1 })
+
+    }
+    // if (cookie) {
+    //   return res
+    //     .status(200)
+    //     .json({ message: "User logout succesfully", msgId: 0 });
+    // } else {
+    //   return res.status(200).json({ message: "Please Login first", msgId: 0 });
+    // }
   } catch (err) {
     console.log(err);
+    return res.status(500).json({ message: "Internal Server Error", msgId: -1 })
   }
 };
 
@@ -331,27 +350,27 @@ const sendUserData = async (req, res) => {
 
 
 
-const getUserData = async (req,res) => {
-  const {name} = req.body
-  const findUser = await Users.findOne({name})
+const getUserData = async (req, res) => {
+  const { name } = req.body
+  const findUser = await Users.findOne({ name })
   try {
-    if(findUser) {
+    if (findUser) {
       let userId = await findUser._id
-      let findUserData = await UsersData.find({user_id:userId}).select("data")
-      
-      console.log(findUserData,"CHECK");
-      if(findUserData) {
-        return res.status(200).json({data: findUserData})
-      }else {
-        return res.status(200).json({message:"User Data Not Found",msgId:-1}) 
-      }
-    }else {
+      let findUserData = await UsersData.find({ user_id: userId }).select("data")
 
-      return res.status(200).json({message:"User Not Found", msgId:-1})
+      console.log(findUserData, "CHECK");
+      if (findUserData) {
+        return res.status(200).json({ data: findUserData })
+      } else {
+        return res.status(200).json({ message: "User Data Not Found", msgId: -1 })
+      }
+    } else {
+
+      return res.status(200).json({ message: "User Not Found", msgId: -1 })
     }
-  }catch (err) {
-    console.log(err,"Error");
-    return res.status(500).json({message:"Internal Server Error", msgId : -1})
+  } catch (err) {
+    console.log(err, "Error");
+    return res.status(500).json({ message: "Internal Server Error", msgId: -1 })
   }
 }
 exports.main = main;
