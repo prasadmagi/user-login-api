@@ -11,7 +11,7 @@ router.post("/changePassword", UserController.changePassword)
 router.post("/changeUserName", UserController.changeUserName)
 router.put("/logout", UserController.logout)
 router.post("/protect", UserController.protect)
-router.post("/allUser", UserController.allUser)
+router.get("/allUser", UserController.allUser)
 router.put("/sendUserData", UserController.sendUserData)
 router.get("/getUserData", UserController.getUserData)
 

@@ -233,9 +233,12 @@ const logout = async (req, res) => {
     }
 
     let findUser = await Users.find({ token: cookie })
+    // let findUser1 = await Users.find({name:findUser.name})
+    let userId= await findUser[0]._id
+    console.log(userId,"findUser1");
     if (findUser) {
-      await Users.findByIdAndUpdate(findUser._id, { isActive: false }, { new: true })
-      await Users.findByIdAndUpdate(findUser._id, { token: undefined }, { new: true })
+      await Users.findByIdAndUpdate(userId, { isActive: false }, { new: true })
+      await Users.findByIdAndUpdate(userId, { token:""  }, { new: true })
       res.clearCookie("authcookie");
       return res.status(200).json({ message: "User Logout Successfully", msgId: 0 })
     } else {
