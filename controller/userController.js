@@ -78,6 +78,8 @@ const loginUser = async (req, res) => {
 
     if (findUser && (await bcrypt.compare(password, findUser.password))) {
       const token = jwt.sign(paylod, key, { expiresIn: "100d" });
+      const isAdmin = findUser.isAdmin
+      console.log(isAdmin, "isAdmin");
       console.log("token", typeof (token));
       //logic for isActive
       await Users.findByIdAndUpdate(findUser._id, { isActive: true, token: token }, { new: true })
@@ -86,6 +88,7 @@ const loginUser = async (req, res) => {
       return res.status(200).json({
         message: "User login Successfully",
         msgId: 0,
+        isAdmin:isAdmin
       });
 
     } else {
@@ -234,9 +237,9 @@ const logout = async (req, res) => {
 
     let findUser = await Users.find({ token: cookie })
     // let findUser1 = await Users.find({name:findUser.name})
-    let userId= await findUser[0]._id
-    console.log(userId,"findUser1");
+    
     if (findUser) {
+      let userId= await findUser[0]._id
       await Users.findByIdAndUpdate(userId, { isActive: false }, { new: true })
       await Users.findByIdAndUpdate(userId, { token:""  }, { new: true })
       res.clearCookie("authcookie");
