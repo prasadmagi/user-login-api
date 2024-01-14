@@ -88,7 +88,8 @@ const loginUser = async (req, res) => {
       return res.status(200).json({
         message: "User login Successfully",
         msgId: 0,
-        isAdmin:isAdmin
+        isAdmin: isAdmin,
+        token: token
       });
 
     } else {
@@ -237,11 +238,11 @@ const logout = async (req, res) => {
 
     let findUser = await Users.find({ token: cookie })
     // let findUser1 = await Users.find({name:findUser.name})
-    
+
     if (findUser) {
-      let userId= await findUser[0]._id
+      let userId = await findUser[0]._id
       await Users.findByIdAndUpdate(userId, { isActive: false }, { new: true })
-      await Users.findByIdAndUpdate(userId, { token:""  }, { new: true })
+      await Users.findByIdAndUpdate(userId, { token: "" }, { new: true })
       res.clearCookie("authcookie");
       return res.status(200).json({ message: "User Logout Successfully", msgId: 0 })
     } else {
@@ -358,7 +359,8 @@ const sendUserData = async (req, res) => {
 
 const getUserData = async (req, res) => {
   const { name } = req.body
-  const findUser = await Users.findOne({ name })
+  const findUser = await Users.findOne({ name: name })
+  console.log(findUser, "finduser");
   try {
     if (findUser) {
       let userId = await findUser._id
