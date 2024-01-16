@@ -88,7 +88,8 @@ const loginUser = async (req, res) => {
       return res.status(200).json({
         message: "User login Successfully",
         msgId: 0,
-        isAdmin:isAdmin
+        isAdmin:isAdmin,
+        user:name
       });
 
     } else {
