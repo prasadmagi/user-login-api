@@ -16,7 +16,9 @@ const createUser = async (req, res) => {
   }
 
   if (isAdmin != "Yes" && isAdmin != "No") {
-    return res.status(404).json({ message: "Please provide proper admin role! ...", msgId: -1 })
+    return res
+      .status(404)
+      .json({ message: "Please provide proper admin role! ...", msgId: -1 });
   }
 
   let users;
@@ -71,30 +73,33 @@ const loginUser = async (req, res) => {
       password: findUser.password,
     };
 
-
     if (cookie) {
       return res.status(200).json({ message: "User Already login", msgId: 0 });
     }
 
     if (findUser && (await bcrypt.compare(password, findUser.password))) {
       const token = jwt.sign(paylod, key, { expiresIn: "100d" });
-      const isAdmin = findUser.isAdmin
+      const isAdmin = findUser.isAdmin;
       console.log(isAdmin, "isAdmin");
-      console.log("token", typeof (token));
+      console.log("token", typeof token);
       //logic for isActive
-      await Users.findByIdAndUpdate(findUser._id, { isActive: true, token: token }, { new: true })
+      await Users.findByIdAndUpdate(
+        findUser._id,
+        { isActive: true, token: token },
+        { new: true }
+      );
       // await ActiveUser.save()
-      res.cookie("authcookie", token, { maxAge: 90000000, httpOnly: true });
-      return res.status(200).json({
-        message: "User login Successfully",
-        msgId: 0,
-        isAdmin: isAdmin,
-        token: token,
-        user:name
-      });
-
+      return res
+        .cookie("authcookie", JSON.stringify(token), { maxAge: 90000000, httpOnly: true })
+        .status(200)
+        .json({
+          message: "User login Successfully",
+          msgId: 0,
+          isAdmin: isAdmin,
+          token: token,
+          user: name,
+        });
     } else {
-
       res.status(200).json({ message: "User login failed", msgId: -1 });
       return;
     }
@@ -230,25 +235,26 @@ const changeUserName = async (req, res) => {
 };
 
 const logout = async (req, res) => {
-  let cookie = req.cookies.authcookie;
+  // let cookie = req.cookies.authcookie;
+  const {token} = req.body
   try {
-
-    if (!cookie) {
-      return res.status(200).json({ message: "Please Login First", msgId: -1 })
+    if (!token) {
+      return res.status(200).json({ message: "Please Login First", msgId: -1 });
     }
 
-    let findUser = await Users.find({ token: cookie })
+    let findUser = await Users.find({token });
     // let findUser1 = await Users.find({name:findUser.name})
-
+    console.log(findUser, "findUser");
     if (findUser) {
-      let userId = await findUser[0]._id
-      await Users.findByIdAndUpdate(userId, { isActive: false }, { new: true })
-      await Users.findByIdAndUpdate(userId, { token: "" }, { new: true })
+      let userId = await findUser[0]._id;
+      await Users.findByIdAndUpdate(userId, { isActive: false }, { new: true });
+      await Users.findByIdAndUpdate(userId, { token: "" }, { new: true });
       res.clearCookie("authcookie");
-      return res.status(200).json({ message: "User Logout Successfully", msgId: 0 })
+      return res
+        .status(200)
+        .json({ message: "User Logout Successfully", msgId: 0 });
     } else {
-      return res.status(200).json({ message: "User Not Found", msgId: -1 })
-
+      return res.status(200).json({ message: "User Not Found", msgId: -1 });
     }
     // if (cookie) {
     //   return res
@@ -259,7 +265,9 @@ const logout = async (req, res) => {
     // }
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ message: "Internal Server Error", msgId: -1 })
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error", msgId: -1 });
   }
 };
 
@@ -304,9 +312,7 @@ const allUser = async (req, res) => {
   }
 };
 
-
 const sendUserData = async (req, res) => {
-
   const { name, data } = req.body;
   const finduser = await Users.findOne({ name: name });
   try {
@@ -331,13 +337,19 @@ const sendUserData = async (req, res) => {
           );
 
           if (updateduserdata) {
-            return res.status(200).json({ message: "User Data Updated Succsessfully", msgId: 0 });
+            return res
+              .status(200)
+              .json({ message: "User Data Updated Succsessfully", msgId: 0 });
           } else {
-            return res.status(200).json({ message: "User Data Not Updated", msgId: -1 });
+            return res
+              .status(200)
+              .json({ message: "User Data Not Updated", msgId: -1 });
           }
         } catch (error) {
           console.log(error, "error");
-          return res.status(500).json({ message: "Internal Server Error", msgId: -1 })
+          return res
+            .status(500)
+            .json({ message: "Internal Server Error", msgId: -1 });
         }
       } else {
         let newUserData = new UsersData({
@@ -345,7 +357,9 @@ const sendUserData = async (req, res) => {
           data: data,
         });
         await newUserData.save();
-        return res.status(200).json({ message: "User Data Created Successfully", msgId: -0 });
+        return res
+          .status(200)
+          .json({ message: "User Data Created Successfully", msgId: -0 });
       }
     }
   } catch (err) {
@@ -356,32 +370,40 @@ const sendUserData = async (req, res) => {
   }
 };
 
-
-
 const getUserData = async (req, res) => {
-  const { name } = req.body
-  const findUser = await Users.findOne({ name: name })
+  const { name } = req.body;
+  const findUser = await Users.findOne({ name: name });
   console.log(findUser, "finduser");
   try {
+    if (!name) {
+      return res
+        .status(200)
+        .json({ message: "Please Enter All Values", msgId: -1 });
+    }
     if (findUser) {
-      let userId = await findUser._id
-      let findUserData = await UsersData.find({ user_id: userId }).select("data")
+      let userId = await findUser._id;
+      let findUserData = await UsersData.find({ user_id: userId }).select(
+        "data"
+      );
 
       console.log(findUserData, "CHECK");
       if (findUserData) {
-        return res.status(200).json({ data: findUserData })
+        return res.status(200).json({ data: findUserData });
       } else {
-        return res.status(200).json({ message: "User Data Not Found", msgId: -1 })
+        return res
+          .status(200)
+          .json({ message: "User Data Not Found", msgId: -1 });
       }
     } else {
-
-      return res.status(200).json({ message: "User Not Found", msgId: -1 })
+      return res.status(200).json({ message: "User Not Found", msgId: -1 });
     }
   } catch (err) {
     console.log(err, "Error");
-    return res.status(500).json({ message: "Internal Server Error", msgId: -1 })
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error", msgId: -1 });
   }
-}
+};
 exports.main = main;
 exports.createUser = createUser;
 exports.loginUser = loginUser;

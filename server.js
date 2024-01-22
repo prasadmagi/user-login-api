@@ -1,13 +1,8 @@
 const connectDB = require("./config/db");
-const Users = require("./models/user");
-const UsersData = require("./models/userdata");
-const bcrypt = require("bcrypt");
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const PORT = process.env.PORT || 4000;
-// const PORT = 4000;
 const app = express();
 const bodyParser = require("body-parser");
 const router = require("./routes/userRoutes");
