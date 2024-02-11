@@ -13,6 +13,6 @@ router.put("/logout", UserController.logout)
 router.post("/protect", UserController.protect)
 router.get("/allUser", UserController.allUser)
 router.put("/sendUserData", UserController.sendUserData)
-router.get("/getUserData", UserController.getUserData)
+router.post("/getUserData", UserController.getUserData)
 
 module.exports = router

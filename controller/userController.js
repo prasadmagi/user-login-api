@@ -236,13 +236,13 @@ const changeUserName = async (req, res) => {
 
 const logout = async (req, res) => {
   // let cookie = req.cookies.authcookie;
-  const {token} = req.body
+  const { token } = req.body
   try {
     if (!token) {
       return res.status(200).json({ message: "Please Login First", msgId: -1 });
     }
 
-    let findUser = await Users.find({token });
+    let findUser = await Users.find({ token });
     // let findUser1 = await Users.find({name:findUser.name})
     console.log(findUser, "findUser");
     if (findUser) {
@@ -326,11 +326,12 @@ const sendUserData = async (req, res) => {
 
       if (userdata) {
         const _finduserid = await finduserid._id;
+        console.log(finduserid, "check111");
         try {
           let updateduserdata = await UsersData.findByIdAndUpdate(
             _finduserid,
             {
-              _id: _finduserid,
+              user_id: _finduserid,
               data: data,
             },
             { new: true }
