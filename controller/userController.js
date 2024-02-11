@@ -319,19 +319,19 @@ const sendUserData = async (req, res) => {
     if (!finduser) {
       return res.status(200).json({ message: "User Not Found", msgId: -1 });
     } else {
-      const id = await finduser.user_id;
-      const finduserid = await UsersData.findOne({ id });
       let user_id = await finduser._id;
-      let userdata = await UsersData.findOne({ user_id: user_id });
+      // const finduserid = await UsersData.findOne({ id });
+      let userdata = await UsersData.findOne({ user_id });
+      console.log(user_id, "check111");
 
       if (userdata) {
-        const _finduserid = await finduserid._id;
-        console.log(finduserid, "check111");
+        let data_id = await userdata._id
+        console.log(data_id);
         try {
           let updateduserdata = await UsersData.findByIdAndUpdate(
-            _finduserid,
+            data_id,
             {
-              user_id: _finduserid,
+              user_id: user_id,
               data: data,
             },
             { new: true }
@@ -387,9 +387,9 @@ const getUserData = async (req, res) => {
         "data"
       );
 
-      console.log(findUserData, "CHECK");
+
       if (findUserData) {
-        return res.status(200).json({ data: findUserData });
+        return res.status(200).json({ data: findUserData, msgId: 0 });
       } else {
         return res
           .status(200)
